@@ -6,8 +6,8 @@
     <!-- Modified  the maxSdk to 23 - Marshmellow, as this is what installed on my device. Otherwise throws Permission Denied for the internet connection-->
     <uses-permission
         android:name="android.permission.INTERNET"
-        android:maxSdkVersion="23"
         />
+
        <!-- android:maxSdkVersion="22" -->
 
 
@@ -39,7 +39,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="barqsoft.footballscores.MainActivity" />
         </activity>
+
         <service android:name=".service.myFetchService" />
+        <service android:name="ListViewService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            />
 
 
         <!-- Today Widget -->
