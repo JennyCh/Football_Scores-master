@@ -60,7 +60,7 @@ public class PagerFragment extends Fragment
     }
 
     public static boolean isRTL() {
-        Log.v("RTL " , String.valueOf(isRTL(Locale.getDefault())));
+       // Log.v("RTL " , String.valueOf(isRTL(Locale.getDefault())));
         return isRTL(Locale.getDefault());
     }
 
@@ -92,7 +92,7 @@ public class PagerFragment extends Fragment
         @Override
         public CharSequence getPageTitle(int position)
         {
-            Log.v("position ", String.valueOf(position));
+        //    Log.v("position ", String.valueOf(position));
             return getDayName(getActivity(),System.currentTimeMillis()+((position-2)*86400000));
         }
         public String getDayName(Context context, long dateInMillis) {

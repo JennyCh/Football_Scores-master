@@ -45,7 +45,7 @@ public class TodayWidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 
-        Log.v("LAUNCH WIDGET",  "BEGIN");
+       // Log.v("LAUNCH WIDGET",  "BEGIN");
 
 
 
@@ -74,7 +74,7 @@ public class TodayWidgetProvider extends AppWidgetProvider {
             remoteViews.setOnClickPendingIntent(R.id.widget, pendingIntent);
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
 
-            Log.v("LAUNCH WIDGET", "end");
+         //   Log.v("LAUNCH WIDGET", "end");
 
         }
 

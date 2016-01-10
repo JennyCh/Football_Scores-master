@@ -24,7 +24,7 @@ public class ListViewService extends RemoteViewsService {
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        Log.v("ListViewService", "onGetViewFactory");
+       // Log.v("ListViewService", "onGetViewFactory");
         return new ListViewRemoteViewsFactory(this.getApplicationContext(), intent);
     }
 
@@ -35,7 +35,7 @@ public class ListViewService extends RemoteViewsService {
         private int mAppWidgetId;
 
         public ListViewRemoteViewsFactory(Context context, Intent intent){
-            Log.v("ListViewService", "ListViewRemoteViewsFactory");
+           // Log.v("ListViewService", "ListViewRemoteViewsFactory");
             this.context = context;
             mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 
@@ -46,9 +46,9 @@ public class ListViewService extends RemoteViewsService {
         }
 
         public void onCreate(){
-            Log.v("ListViewService", "onCreate");
+           // Log.v("ListViewService", "onCreate");
 
-            
+
             Cursor data = context.getContentResolver().query(
                     DatabaseContract.BASE_CONTENT_URI,
                     null,
@@ -60,11 +60,11 @@ public class ListViewService extends RemoteViewsService {
             );
 
             if (data == null) {
-                Log.v("LOG_TAG", "data is null");
+               // Log.v("LOG_TAG", "data is null");
                 return;
             }
             if (!data.moveToFirst()) {
-                Log.v("LOG_TAG", "NO DATA");
+              //  Log.v("LOG_TAG", "NO DATA");
                 data.close();
                 return;
             }
@@ -86,9 +86,9 @@ public class ListViewService extends RemoteViewsService {
            // }data.moveToFirst();
                 //getViewAt(i);
             }
-            for(int a = 0; a < mWidgetItems.size(); a++){
-                Log.v("ITEMS IN THE LIST", mWidgetItems.get(a).toString());
-            }
+           // for(int a = 0; a < mWidgetItems.size(); a++){
+               // Log.v("ITEMS IN THE LIST", mWidgetItems.get(a).toString());
+           // }
             List<WidgetItem> copyItems = new ArrayList<>();
 
             for(int i = 0; i < mCount; i++){
@@ -106,7 +106,7 @@ public class ListViewService extends RemoteViewsService {
 
 
         public RemoteViews getViewAt(int position) {
-            Log.v("ListViewService", "getViewAt");
+          //  Log.v("ListViewService", "getViewAt");
             // position will always range from 0 to getCount() - 1.
 
             // Construct a RemoteViews item based on the app widget item XML file, and set the
@@ -115,7 +115,7 @@ public class ListViewService extends RemoteViewsService {
            // RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_small);
             RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.widget_list_item);
 
-            Log.v("POSITION ", String.valueOf(position) + " | " + mWidgetItems.get(position).toString());
+           // Log.v("POSITION ", String.valueOf(position) + " | " + mWidgetItems.get(position).toString());
          /*   if(position == 1){
                 Log.v("POSITION ", getDayOfWeekNow(null) + " | " + getDayMonthNow());
                 remoteViews.setTextViewText(R.id.day_of_the_week, getDayOfWeekNow(null));
@@ -126,11 +126,11 @@ public class ListViewService extends RemoteViewsService {
             rv.setTextViewText(R.id.team1, mWidgetItems.get(position).getTeam1());
             rv.setTextViewText(R.id.team2, mWidgetItems.get(position).getTeam2());
             rv.setTextViewText(R.id.time, mWidgetItems.get(position).getTime());
-            if(position != 0) {
-                Log.v("COMPARE ", mWidgetItems.get(position).getDate() + " = " + (mWidgetItems.get(position - 1).getDate()));
-            }else{
-                Log.v("COMPARE ", mWidgetItems.get(position).getDate());
-            }
+           // if(position != 0) {
+            //    Log.v("COMPARE ", mWidgetItems.get(position).getDate() + " = " + (mWidgetItems.get(position - 1).getDate()));
+          //  }else{
+             //   Log.v("COMPARE ", mWidgetItems.get(position).getDate());
+           // }
             //if((position != 0 && !(mWidgetItems.get(position).getDate().equals(mWidgetItems.get(position-1).getDate()))) || position == 0 ){
             try {
                 String finalDate = getMatchDate(mWidgetItems.get(position).getDate());
@@ -161,13 +161,13 @@ public class ListViewService extends RemoteViewsService {
 
         @Override
         public int getCount() {
-            //TODO: must return the number of items, because if 0 by default, you will always end up with an empty list
+            //must return the number of items, because if 0 by default, you will always end up with an empty list
             return this.mCount;
         }
 
         @Override
         public void onDataSetChanged() {
-            Log.v("ListViewService", "onDataSetChanged");
+            //Log.v("ListViewService", "onDataSetChanged");
         }
 
         @Override
@@ -183,7 +183,7 @@ public class ListViewService extends RemoteViewsService {
 
         @Override
         public int getViewTypeCount() {
-            //TODO: must fix initial 0 value, otherwise constant "Looading..." on each item
+            // must fix initial 0 value, otherwise constant "Looading..." on each item
             return 1;
         }
 

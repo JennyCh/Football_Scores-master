@@ -54,7 +54,7 @@ public class myFetchService extends IntentService
 
         Uri fetch_build = Uri.parse(BASE_URL).buildUpon().
                 appendQueryParameter(QUERY_TIME_FRAME, timeFrame).build();
-        Log.v(LOG_TAG, "The url we are looking at is: "+fetch_build.toString()); //log spam
+        //Log.v(LOG_TAG, "The url we are looking at is: "+fetch_build.toString()); //log spam
         HttpURLConnection m_connection = null;
         BufferedReader reader = null;
         String JSON_data = null;
@@ -83,7 +83,10 @@ public class myFetchService extends IntentService
                 // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
                 // But it does make debugging a *lot* easier if you print out the completed
                 // buffer for debugging.
-                stringBuilder.append(line + "\n");
+
+                //fixed string concatination inside stringBuilder: ruins the intire point of StringBuilder
+                stringBuilder.append(line);
+                stringBuilder.append("\n");
             }
             if (stringBuilder.length() == 0) {
                 // Stream was empty.  No point in parsing.
@@ -266,8 +269,12 @@ public class myFetchService extends IntentService
             int inserted_data = 0;
             ContentValues[] insert_data = new ContentValues[values.size()];
             values.toArray(insert_data);
-            inserted_data = mContext.getContentResolver().bulkInsert(
-                    DatabaseContract.BASE_CONTENT_URI,insert_data);
+            try {
+                inserted_data = mContext.getContentResolver().bulkInsert(
+                        DatabaseContract.BASE_CONTENT_URI, insert_data);
+            }catch(NullPointerException e){
+                e.printStackTrace();
+            }
 
             //Log.v(LOG_TAG,"Succesfully Inserted : " + String.valueOf(inserted_data));
         }
