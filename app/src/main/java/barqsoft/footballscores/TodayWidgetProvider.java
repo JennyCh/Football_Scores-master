@@ -16,6 +16,9 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Created by Jenny on 12/18/2015.
  */
@@ -43,30 +46,11 @@ public class TodayWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 
         Log.v("LAUNCH WIDGET",  "BEGIN");
-        //TODO: this is hard coded
-        Cursor data = context.getContentResolver().query(
-                DatabaseContract.scores_table.buildScoreWithDate(),
-                null,
-                null,
-                new String[]{"2015-12-19"},
-                null
-        );
 
-        if (data == null) {
-            Log.v("LOG_TAG", "data is null");
-            return;
-        }
-        if (!data.moveToFirst()) {
-            Log.v("LOG_TAG", "NO DATA");
-            data.close();
-            return;
-        }
 
 
 
         for (int appWidgetId : appWidgetIds) {
-           // int layoutId = R.layout.widget_small;
-           // RemoteViews views = new RemoteViews(context.getPackageName(), layoutId);
 
             Intent intent = new Intent(context, ListViewService.class);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
@@ -74,6 +58,9 @@ public class TodayWidgetProvider extends AppWidgetProvider {
 
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_small);
             //remoteViews.setTextViewText(R.id.team1, "1");
+            remoteViews.setTextViewText(R.id.day_of_the_week, getDayOfWeekNow(null));
+            remoteViews.setTextViewText(R.id.date_today, getDayMonthNow());
+
             remoteViews.setRemoteAdapter(R.id.widget_list_view, intent);
 
             remoteViews.setEmptyView(R.id.widget_list_view, R.id.empty_view);
@@ -82,74 +69,64 @@ public class TodayWidgetProvider extends AppWidgetProvider {
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
 
 
-
-            Intent toastIntent = new Intent(context, TodayWidgetProvider.class);
-            // Set the action for the intent.
-            // When the user touches a particular view, it will have the effect of
-            // broadcasting TOAST_ACTION.
-            toastIntent.setAction(TodayWidgetProvider.TOAST_ACTION);
-            toastIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
-            PendingIntent toastPendingIntent = PendingIntent.getBroadcast(context, 0, toastIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-            remoteViews.setPendingIntentTemplate(R.id.widget_list_view, toastPendingIntent);
-
+            Intent lauchAppIntent =  new Intent(context, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context,0,lauchAppIntent, 0);
+            remoteViews.setOnClickPendingIntent(R.id.widget, pendingIntent);
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
 
             Log.v("LAUNCH WIDGET", "end");
 
-      /*   //Working version of the widget with simple textViews
-
-         String t1Data = data.getString(data.getColumnIndex(DatabaseContract.scores_table.HOME_COL));
-            String t2Data = data.getString(data.getColumnIndex(DatabaseContract.scores_table.AWAY_COL));
-            String timeData = data.getString(data.getColumnIndex(DatabaseContract.scores_table.TIME_COL));
-
-            Log.v(LOG_TAG, t1Data + " | " + t2Data + " | " + timeData);
-
-            LayoutInflater inflater = LayoutInflater.from(context);
-            View view = inflater.inflate(R.layout.widget_small, null);
-
-            views.setTextViewText(R.id.team1, t1Data);
-            views.setTextViewText(R.id.team2, t2Data);
-            views.setTextViewText(R.id.time, timeData);
-            */
-
-
-    /*
-    //Not working attempt to create ListView in the widget
-
-     LayoutInflater inflater = LayoutInflater.from(context);
-            View viewFloat = inflater.inflate(R.layout.widget_small, null);
-            this.listView = (ListView) viewFloat.findViewById(R.id.widget_list_view);
-            SimpleCursorAdapter cursorAdapter = new SimpleCursorAdapter(context, R.layout.widget_list_item, data, new String[]{
-                    DatabaseContract.scores_table.HOME_COL,
-                    DatabaseContract.scores_table.AWAY_COL,
-                    DatabaseContract.scores_table.TIME_COL
-            }, new int[]{
-                    R.id.team1,
-                    R.id.team2,
-                    R.id.time
-            },0);
-
-            if(cursorAdapter == null){
-                Log.v(LOG_TAG, "cursorAdapter is null");
-            }
-
-            views.setRemoteAdapter(layoutId, new Intent());*/
-
-
-
-
-           /* Intent launchIntent = new Intent(context, MainActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, 0);
-            views.setOnClickPendingIntent(R.id.widget, pendingIntent);
-            appWidgetManager.updateAppWidget(appWidgetId, views);
-
-           */
-
         }
 
-        super.onUpdate(context,appWidgetManager,appWidgetIds);
+        super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
+
+    private String getDayOfWeekNow(Date passedDate){
+        Calendar calendar = Calendar.getInstance();
+        if(passedDate != null){
+            calendar.setTime(passedDate);
+        }
+        int dayOfWeekNumeric = calendar.get(Calendar.DAY_OF_WEEK);
+        String dayOfWeek;
+
+        switch (dayOfWeekNumeric){
+            case 1: dayOfWeek = "Sun"; break;
+            case 2: dayOfWeek = "Mon"; break;
+            case 3: dayOfWeek = "Tue"; break;
+            case 4: dayOfWeek = "Wed"; break;
+            case 5: dayOfWeek = "Thru"; break;
+            case 6: dayOfWeek = "Fri"; break;
+            case 7: dayOfWeek = "Sat"; break;
+            default:
+                dayOfWeek = "Invalid";
+        }
+        return dayOfWeek;
+    }
+
+    private String getDayMonthNow() {
+        Calendar calendar = Calendar.getInstance();
+        int date = calendar.get(Calendar.DATE);
+        int monthNumeric = calendar.get(Calendar.MONTH);
+        String month;
+        switch (monthNumeric){
+            case 0: month = "January"; break;
+            case 1: month = "February"; break;
+            case 2: month = "March"; break;
+            case 3: month = "April"; break;
+            case 4: month = "May"; break;
+            case 5: month = "June"; break;
+            case 6: month = "July"; break;
+            case 7: month = "August"; break;
+            case 8: month = "September"; break;
+            case 9: month = "October"; break;
+            case 10: month = "November"; break;
+            case 11: month = "December"; break;
+            default:
+                month = "Error";
+        }
+
+        return (month + " " + date);
+    }
+
 }
 

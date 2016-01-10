@@ -111,7 +111,7 @@ public class ScoresProvider extends ContentProvider
 
             case MATCHES: retCursor = mOpenHelper.getReadableDatabase().query(
                     DatabaseContract.SCORES_TABLE,
-                    projection,null,null,null,null,sortOrder); break;
+                    projection,selection,selectionArgs,null,null,sortOrder); break;
             case MATCHES_WITH_DATE:
                 //Log.v("ScoresProvider query", "MATCHES_WITH_DATE");
                     //Log.v(FetchScoreTask.LOG_TAG,selectionArgs[1]);
@@ -129,7 +129,11 @@ public class ScoresProvider extends ContentProvider
                     projection,SCORES_BY_LEAGUE,selectionArgs,null,null,sortOrder); break;
             default: throw new UnsupportedOperationException("Unknown Uri" + uri);
         }
-        retCursor.setNotificationUri(getContext().getContentResolver(),uri);
+        try {
+            retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+        }catch(NullPointerException e){
+            throw e;
+        }
         return retCursor;
     }
 

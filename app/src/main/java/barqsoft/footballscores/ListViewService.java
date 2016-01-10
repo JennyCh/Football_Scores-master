@@ -3,18 +3,24 @@ package barqsoft.footballscores;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Created by Jenny on 12/19/2015.
  */
 public class ListViewService extends RemoteViewsService {
+
+    private boolean putDate = true;
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
@@ -23,8 +29,8 @@ public class ListViewService extends RemoteViewsService {
     }
 
     class ListViewRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory{
-        private static final int mCount = 10;
-        private List<WidgetItem> mWidgetItems = new ArrayList<WidgetItem>();
+        private int mCount;
+        private List<WidgetItem> mWidgetItems = new ArrayList<>();
         private Context context;
         private int mAppWidgetId;
 
@@ -35,26 +41,109 @@ public class ListViewService extends RemoteViewsService {
 
         }
 
+        private String getTodayDate(){
+            return new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        }
+
         public void onCreate(){
             Log.v("ListViewService", "onCreate");
+
+            
+            Cursor data = context.getContentResolver().query(
+                    DatabaseContract.BASE_CONTENT_URI,
+                    null,
+                    DatabaseContract.scores_table.DATE_COL + " >= ? ",
+                    new String[]{getTodayDate()},
+                    //null,
+                    //null,
+                    DatabaseContract.scores_table.DATE_COL
+            );
+
+            if (data == null) {
+                Log.v("LOG_TAG", "data is null");
+                return;
+            }
+            if (!data.moveToFirst()) {
+                Log.v("LOG_TAG", "NO DATA");
+                data.close();
+                return;
+            }
+            this.mCount = data.getCount();
+
+            String team1Text, team2Text, timeText, dateText;
+
+            data.moveToFirst();
             for (int i = 0; i < mCount; i++){
-                mWidgetItems.add(new WidgetItem(i + "!"));
+
+            //while(data.moveToNext()) {
+                team1Text = data.getString(data.getColumnIndex(DatabaseContract.scores_table.HOME_COL));
+                team2Text = data.getString(data.getColumnIndex(DatabaseContract.scores_table.AWAY_COL));
+                timeText = data.getString(data.getColumnIndex(DatabaseContract.scores_table.TIME_COL));
+                dateText = data.getString(data.getColumnIndex(DatabaseContract.scores_table.DATE_COL));
+
+                mWidgetItems.add(new WidgetItem(team1Text, team2Text, timeText, dateText));
+                data.moveToNext();
+           // }data.moveToFirst();
                 //getViewAt(i);
             }
             for(int a = 0; a < mWidgetItems.size(); a++){
-                Log.v("ITEMS IN THE LIST", mWidgetItems.get(a).getText());
+                Log.v("ITEMS IN THE LIST", mWidgetItems.get(a).toString());
+            }
+            List<WidgetItem> copyItems = new ArrayList<>();
+
+            for(int i = 0; i < mCount; i++){
+                if((i != 0) && (mWidgetItems.get(i-1).getDate().equals(mWidgetItems.get(i).getDate()))){
+                    copyItems.add(new WidgetItem(mWidgetItems.get(i).getTeam1(), mWidgetItems.get(i).getTeam2(), mWidgetItems.get(i).getTime(), ""));
+                }else {
+                    copyItems.add(new WidgetItem(mWidgetItems.get(i).getTeam1(), mWidgetItems.get(i).getTeam2(), mWidgetItems.get(i).getTime(), mWidgetItems.get(i).getDate()));
+                }
             }
 
+            this.mWidgetItems = copyItems;
+
         }
+
+
+
         public RemoteViews getViewAt(int position) {
             Log.v("ListViewService", "getViewAt");
             // position will always range from 0 to getCount() - 1.
 
             // Construct a RemoteViews item based on the app widget item XML file, and set the
             // text based on the position.
-            Log.v("ITEM ", mWidgetItems.get(position).getText());
+            //Log.v("ITEM ", mWidgetItems.get(position).getText());
+           // RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_small);
             RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.widget_list_item);
-            rv.setTextViewText(R.id.team1, mWidgetItems.get(position).getText());
+
+            Log.v("POSITION ", String.valueOf(position) + " | " + mWidgetItems.get(position).toString());
+         /*   if(position == 1){
+                Log.v("POSITION ", getDayOfWeekNow(null) + " | " + getDayMonthNow());
+                remoteViews.setTextViewText(R.id.day_of_the_week, getDayOfWeekNow(null));
+                remoteViews.setTextViewText(R.id.date_today, getDayMonthNow());
+            }*/
+            //int id = getItemId(position);
+
+            rv.setTextViewText(R.id.team1, mWidgetItems.get(position).getTeam1());
+            rv.setTextViewText(R.id.team2, mWidgetItems.get(position).getTeam2());
+            rv.setTextViewText(R.id.time, mWidgetItems.get(position).getTime());
+            if(position != 0) {
+                Log.v("COMPARE ", mWidgetItems.get(position).getDate() + " = " + (mWidgetItems.get(position - 1).getDate()));
+            }else{
+                Log.v("COMPARE ", mWidgetItems.get(position).getDate());
+            }
+            //if((position != 0 && !(mWidgetItems.get(position).getDate().equals(mWidgetItems.get(position-1).getDate()))) || position == 0 ){
+            try {
+                String finalDate = getMatchDate(mWidgetItems.get(position).getDate());
+                rv.setTextViewText(R.id.date, finalDate);
+                if(!"".equals(finalDate)) {
+                    rv.setTextViewText(R.id.day_week, getDayOfWeekNow(mWidgetItems.get(position).getDate()));
+                }else{
+                    rv.setTextViewText(R.id.day_week, "");
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            //}
 
             // Next, set a fill-intent, which will be used to fill in the pending intent template
             // that is set on the collection view in StackWidgetProvider.
@@ -73,7 +162,7 @@ public class ListViewService extends RemoteViewsService {
         @Override
         public int getCount() {
             //TODO: must return the number of items, because if 0 by default, you will always end up with an empty list
-            return mWidgetItems.size();
+            return this.mCount;
         }
 
         @Override
@@ -89,6 +178,7 @@ public class ListViewService extends RemoteViewsService {
         @Override
         public RemoteViews getLoadingView() {
             return null;
+            //return new RemoteViews(context.getPackageName(), )
         }
 
         @Override
@@ -98,13 +188,72 @@ public class ListViewService extends RemoteViewsService {
         }
 
         @Override
-        public long getItemId(int i) {
-            return 0;
+        public long getItemId(int position) {
+            return position;
         }
 
         @Override
         public boolean hasStableIds() {
-            return false;
+            return true;
         }
+
+        private String getMatchDate(String date)throws Exception{
+            if("".equals(date)){
+                return "";
+            }
+            StringBuilder formattedDate = new StringBuilder();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date convertedDate = sdf.parse(date);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(convertedDate);
+            return String.valueOf(calendar.get(Calendar.DATE));
+        }
+
+        private String getDayOfWeekNow(Date passedDate){
+            Calendar calendar = Calendar.getInstance();
+            if(passedDate != null){
+                calendar.setTime(passedDate);
+            }
+            int dayOfWeekNumeric = calendar.get(Calendar.DAY_OF_WEEK);
+            String dayOfWeek;
+
+            switch (dayOfWeekNumeric){
+                case 1: dayOfWeek = "Sun"; break;
+                case 2: dayOfWeek = "Mon"; break;
+                case 3: dayOfWeek = "Tue"; break;
+                case 4: dayOfWeek = "Wed"; break;
+                case 5: dayOfWeek = "Thru"; break;
+                case 6: dayOfWeek = "Fri"; break;
+                case 7: dayOfWeek = "Sat"; break;
+                default:
+                    dayOfWeek = "Invalid";
+            }
+            return dayOfWeek;
+        }
+
+        private String getDayOfWeekNow(String passedDate) throws Exception{
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date convertedDate = sdf.parse(passedDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(convertedDate);
+            int dayOfWeekNumeric = calendar.get(Calendar.DAY_OF_WEEK);
+            String dayOfWeek;
+
+            switch (dayOfWeekNumeric){
+                case 1: dayOfWeek = "Sun"; break;
+                case 2: dayOfWeek = "Mon"; break;
+                case 3: dayOfWeek = "Tue"; break;
+                case 4: dayOfWeek = "Wed"; break;
+                case 5: dayOfWeek = "Thru"; break;
+                case 6: dayOfWeek = "Fri"; break;
+                case 7: dayOfWeek = "Sat"; break;
+                default:
+                    dayOfWeek = "Invalid";
+            }
+            return dayOfWeek;
+        }
+
+
+
     }
 }

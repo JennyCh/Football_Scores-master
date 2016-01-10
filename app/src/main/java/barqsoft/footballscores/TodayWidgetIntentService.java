@@ -30,38 +30,13 @@ public class TodayWidgetIntentService extends IntentService{
     @Override
     public void onCreate() {
         super.onCreate();
-     /*   LayoutInflater inflater = LayoutInflater.from(this);
-        View viewFloat = inflater.inflate(R.layout.widget_small, null);
-        this.listView = (ListView)viewFloat.findViewById(R.id.widget_list_view);
 
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, TodayWidgetProvider.class));
-
-        Cursor data = getContentResolver().query(DatabaseContract.scores_table.buildScoreWithDate(),
-                null,
-                DatabaseContract.scores_table.DATE_COL + "LIKE = ?",
-                new String[]{"'2015-12-19'"},
-                null
-        );
-
-        if (data == null){
-            Log.v("LOG_TAG", "data is null");
-            return;
-        }
-        if (!data.moveToFirst()) {
-            Log.v("LOG_TAG", "NO DATA");
-            data.close();
-            return;
-        }
-
-        WidgetScoresAdapter widgetScoresAdapter = new WidgetScoresAdapter(this, R.layout.widget_list_item, data, null, null);
-        this.listView.setAdapter(widgetScoresAdapter);*/
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
 
-   /*     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+     /*   AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, TodayWidgetProvider.class));
 
         Cursor data = getContentResolver().query(DatabaseContract.scores_table.buildScoreWithDate(),
@@ -82,9 +57,9 @@ public class TodayWidgetIntentService extends IntentService{
         }
 
         WidgetScoresAdapter widgetScoresAdapter = new WidgetScoresAdapter(this, data, false);
-        this.listView.setAdapter(widgetScoresAdapter);*/
+        this.listView.setAdapter(widgetScoresAdapter);
 
-       /* int team1 = data.getColumnIndex(DatabaseContract.scores_table.HOME_COL);
+        int team1 = data.getColumnIndex(DatabaseContract.scores_table.HOME_COL);
         int team2 = data.getColumnIndex(DatabaseContract.scores_table.AWAY_COL);
         int time = data.getColumnIndex(DatabaseContract.scores_table.DATE_COL);
 
